@@ -9,6 +9,7 @@ include "functions.php";
 <head>
     <title>Explorer</title>
     <link rel="stylesheet" href="styles.css" type="text/css">
+    <meta charset="utf-8">
 </head>
 <body>
 

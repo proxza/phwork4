@@ -1,15 +1,44 @@
 <?php
 
 function dirList($dir){
+
+    // Фильтрация
+    $fld = strip_tags($_GET['fld']);
+    $fld = htmlspecialchars($fld);
+    $fld = rtrim($fld, ".");
+    $fld = rtrim($fld, "./");
+    $fld = urlencode($fld);
+
+    // Принимает GET запрос по ссылке и переходим в папку
+    if (isset($fld) && is_dir($dir.$fld)){
+        $dir = $dir . $fld;
+        chdir($dir);
+    }
+    //
     $data = opendir($dir);
 
     // Открываем и считываем директорию
     while($file = readdir($data)){
-        if ($file != "." && $file != ".."){
+        if ($file != "." && $file != "..") {
             $files[] = $file;
         }
     }
     closedir($data);
+
+    // Проверка на пустой массив files (если папка пустая)
+    if (empty($files)){
+        echo "<tr>";
+        echo "<td><a href='index.php?fld='>Вернуться</a></td>";
+        echo "</tr>";
+        echo "<tr>";
+        echo "<td>Пустая папка...</td>";
+        echo "</tr>";
+        return;
+    }else{
+        echo "<tr>";
+        echo "<td><a href='index.php?fld='>Вернуться</a></td>";
+        echo "</tr>";
+    }
 
     // Сортируем полученный массив по алфавиту
     asort($files);
@@ -32,10 +61,9 @@ function dirList($dir){
                     $ext = '<img src="images/folder.png" alt="pic" class="icon">';
             }
         }else{
+            $items = '<a href="index.php?fld='.$items.'">'.$items.'</a>';
             $ext = '<img src="images/folder.png" alt="pic" class="icon">';
         }
-
-
 
         echo "<tr>";
         echo "<td>" .$ext. " " .$items. "</td>";
