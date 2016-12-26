@@ -35,3 +35,15 @@ body {
     width: 1000px;
     height: 50px;
 }
+
+#file-list-table {
+    padding: 5px 5px;
+    font-size: 12px;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    border: 0px;
+    vertical-align: middle;
+}
