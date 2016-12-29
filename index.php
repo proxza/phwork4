@@ -1,6 +1,8 @@
 <?php
 
-CONST ROOT_DIR = "D:/Test/";
+session_start();
+
+$rootDir = getcwd();
 include "functions.php";
 
 ?>
@@ -18,13 +20,13 @@ include "functions.php";
 Logo
     </div>
     <div id="url">
-<?=ROOT_DIR;?>
+<?=$rootDir;?>
     </div>
     <div id="content">
         <table id="file-list-table">
             <?php
 
-            dirList(ROOT_DIR);
+            dirList($rootDir);
 
             ?>
         </table>

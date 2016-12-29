@@ -2,19 +2,36 @@
 
 function dirList($dir){
 
-    // Фильтрация
-    $fld = strip_tags($_GET['fld']);
-    $fld = htmlspecialchars($fld);
-    $fld = rtrim($fld, ".");
-    $fld = rtrim($fld, "./");
-    $fld = urlencode($fld);
+    //unset($_SESSION['url']);
+   // Принимает GET запрос по ссылке и переходим в папку + Фильтрация
+    if (isset($_GET['fld'])){
+        $fld = strip_tags($_GET['fld']);
+        $fld = htmlspecialchars($fld);
+        $fld = rtrim($fld, ".");
+        $fld = rtrim($fld, "./");
+        $fld = urlencode($fld);
 
-    // Принимает GET запрос по ссылке и переходим в папку
-    if (isset($fld) && is_dir($dir.$fld)){
-        $dir = $dir . $fld;
-        chdir($dir);
+        // Костяль в виде многоуровнего вхождения в папку и обратно
+        if (empty($_SESSION['url'])){
+            $_SESSION['url'] = $fld;
+            $dir = $dir."/".$_SESSION['url'];
+        }else{
+            if ($fld == "back"){
+                $back = substr($_SESSION['url'], 0, strrpos($_SESSION['url'], "/"));
+                $_SESSION['url'] = $back;
+                $dir = $dir."/".$_SESSION['url'];
+            }else{
+                $dir = $dir."/".$_SESSION['url']."/".$fld;
+                $_SESSION['url'] .= "/".$fld;
+            }
+        }
+
+        // Меняем директорию
+        if (is_dir($dir)){
+            chdir($dir);
+        }
     }
-    //
+
     $data = opendir($dir);
 
     // Открываем и считываем директорию
@@ -28,15 +45,15 @@ function dirList($dir){
     // Проверка на пустой массив files (если папка пустая)
     if (empty($files)){
         echo "<tr>";
-        echo "<td><a href='index.php?fld='>Вернуться</a></td>";
+        echo "<td><a href='index.php?fld=back'>Вернуться</a></td>";
         echo "</tr>";
         echo "<tr>";
         echo "<td>Пустая папка...</td>";
         echo "</tr>";
         return;
-    }else{
+    }elseif (!empty($_SESSION['url'])){
         echo "<tr>";
-        echo "<td><a href='index.php?fld='>Вернуться</a></td>";
+        echo "<td><a href='index.php?fld=back'>Вернуться</a></td>";
         echo "</tr>";
     }
 
