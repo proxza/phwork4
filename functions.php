@@ -83,9 +83,29 @@ function dirList($dir){
         }
 
         echo "<tr>";
-        echo "<td>" .$ext. " " .$items. "</td>";
+        echo "<td><input type='checkbox' name='fls' value='$items'>" .$ext. " " .$items. "</td>";
         echo "</tr>";
     }
+}
+
+
+function deleteFiles($dir, $data){
+    $pattern = "|<a[^>]+>(.+?)</a>|";
+    preg_match_all($pattern, $data, $out);
+    unset($out[0]);
+
+
+    echo $out[1];
+    if (is_dir($dir."/".$data)){
+        rmdir($data);
+        print_r($dir."/".$data);
+    }
+
+    if (is_file($dir."/".$data)){
+        unlink($data);
+    }
+    //echo "Файл удален";
+
 }
 
 ?>
