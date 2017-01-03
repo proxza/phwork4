@@ -2,7 +2,6 @@
 
 function dirList($dir){
 
-    //unset($_SESSION['url']);
    // Принимает GET запрос по ссылке и переходим в папку + Фильтрация
     if (isset($_GET['fld'])){
         $fld = strip_tags($_GET['fld']);
@@ -95,14 +94,24 @@ function deleteFiles($dir, $data){
     unset($out[0]);
 
 
-    echo $out[1];
-    if (is_dir($dir."/".$data)){
-        rmdir($data);
-        print_r($dir."/".$data);
+    if (is_array($out) && !empty($out[1])){
+        foreach ($out as $key){
+            $data = $key[0];
+        }
     }
 
+    if (!empty($_SESSION['url'])){
+        $dir = $dir."/".$_SESSION['url'];
+    }
+
+    if (is_dir($dir."/".$data)){
+        rmdir($data);
+    }
+
+    print_r($dir."/".$data);
+
     if (is_file($dir."/".$data)){
-        unlink($data);
+        unlink($dir."/".$data);
     }
     //echo "Файл удален";
 

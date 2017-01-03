@@ -6,7 +6,7 @@ $rootDir = getcwd();
 include "functions.php";
 
 
-//print_r($_POST['fls']);
+print_r($_SESSION['url']);
 
 switch (true){
     case isset($_POST['create']):
@@ -20,6 +20,11 @@ switch (true){
         break;
     case isset($_POST['copy']);
         echo "COPY";
+        break;
+    case isset($_POST['sessionOff']);
+        // Временное решение по очистке сессии
+        session_destroy();
+        unset($_SESSION['url']);
         break;
 }
 ?>
@@ -58,6 +63,9 @@ Logo
             </tr>
             <tr>
                 <td><input type="submit" name="copy" value="Копировать"></td>
+            </tr>
+            <tr>
+                <td><input type="submit" name="sessionOff" value="KillSession"></td>
             </tr>
         </table>
         </form>
