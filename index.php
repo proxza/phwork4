@@ -15,6 +15,10 @@
             vertical-align: middle;
         }
 
+        .inp {
+            width: 300px;
+        }
+
         a {
             color: #000000;
             text-decoration: none;
@@ -75,24 +79,39 @@
         switch (true){
             // Кнопка "создать папку"
             case isset($_POST['create']):
-                echo "<input type='text' name='newfolder'>";
+                echo "<input type='text' name='newFolder' placeholder='Название папки'>";
                 echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
-                echo "<input type='submit' name='addfolder' value='Создать'>";
+                echo "<input type='submit' name='addFolder' value='Создать папку'>";
                 exit;
-            case isset($_POST['addfolder']):
-                @mkdir($_POST['realDir'].$_POST['newfolder'], 0777);
-                exit("<meta http-equiv='refresh' content='0; url= $_SERVER[PHP_SELF]';>");
+            case isset($_POST['createFile']):
+                echo "<input type='text' name='fileName' placeholder='Название файла с расширением (name.txt, etc)' class='inp'> <br />";
+                echo "<input type='text' name='fileContent' placeholder='Текст файла' class='inp'> <br />";
+                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
+                echo "<input type='submit' name='addFile' value='Создать файл'>";
+                exit;
+            case isset($_POST['addFile']):
+                $fileOpen = fopen($_POST['realDir'].$_POST['fileName'], "w");
+                fwrite($fileOpen, $_POST['fileContent']);
+                fclose($fileOpen);
+                break;
+            case isset($_POST['addFolder']):
+                @mkdir($_POST['realDir'].$_POST['newFolder'], 0777);
+                break;
+
             // Кнопка "удалить"
             case isset($_POST['delete']):
                 fileDelete($_POST['fls']);
+                chdir($_POST['realDir']);
                 break;
+
             // Кнопка "переименовать"
             case isset($_POST['rename']):
-                echo "<input type='text' name='newname' value='".basename($_POST['fls'])."'>";
+                echo "<input type='text' name='newname' value='".basename($_POST['fls'])."' placeholder='Новое название'>";
                 echo "<input type='hidden' name='oldname' value='".basename($_POST['fls'])."'>";
                 echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
                 echo "<input type='submit' name='edit' value='Save'>";
                 exit;
+
             case isset($_POST['edit']):
                 rename($_POST['realDir'].$_POST['oldname'], $_POST['realDir'].$_POST['newname']);
                 // Остановка скрипта и обновление страницы
@@ -100,33 +119,32 @@
             case isset($_POST['copy']):
                 echo "COPY";
                 break;
-            // Кнопка Загрузить
+
+            // Кнопка "загрузить"
             case isset($_POST['upload']):
                 echo "<input type='file' name='uploadFile'>";
                 echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
                 echo "<input type='submit' value='Загрузить'>";
                 exit;
-            // Кнопка прав
+
+            // Кнопка "права доступа"
             case isset($_POST['chmode']):
-                print_r(dirname(__DIR__));
                 echo "<tr><td><input type='checkbox' name='ch1'></td><td> - Доступ и запись для владельца/Другим доступа нет (0600)</td></tr>";
                 echo "<tr><td><input type='checkbox' name='ch2'></td><td> - Доступ и запись для владельца/Другим на чтение для других (0644)</td></tr>";
                 echo "<tr><td><input type='checkbox' name='ch3'></td><td> - Полный доступ для владельца/Другим на чтение и выполнение для других (0755)</td></tr>";
                 echo "<tr><td><input type='checkbox' name='ch4'></td><td> - god mode (0777)</td></tr>";
                 echo "<input type='hidden' name='chfls' value='".$_POST['fls']."'>";
-                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
                 echo "<tr><td colspan='2'><input type='submit' name='saveMode' value='Применить'></td></tr>";
                 exit;
             case isset($_POST['saveMode']):
-                print_r($_POST['chfls']);
                 if (isset($_POST['ch1'])) {
-                    chmod($_POST['realDir'].$_POST['chfls'], 0600);
+                    chmod($_POST['chfls'], 0600);
                 }elseif (isset($_POST['ch2'])) {
-                    chmod($_POST['realDir'].$_POST['chfls'], 0644);
+                    chmod($_POST['chfls'], 0644);
                 }elseif (isset($_POST['ch3'])) {
-                    chmod($_POST['realDir'].$_POST['chfls'], 0755);
+                    chmod($_POST['chfls'], 0755);
                 }elseif (isset($_POST['ch4'])) {
-                    chmod($_POST['realDir'].$_POST['chfls'], 0777);
+                    chmod($_POST['chfls'], 0777);
                 }
                 break;
 
@@ -153,7 +171,7 @@
 
         ?>
         <tr>
-            <td><br /><input type="submit" name="create" value="Создать папку"><input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></td>
+            <td><br /><input type="submit" name="create" value="Создать папку"> <input type="submit" name="createFile" value="Создать файл"><input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></td>
         </tr>
         <tr>
             <td><input type="submit" name="delete" value="Удалить"></td>
@@ -211,10 +229,35 @@ function fileView ($view) {
  */
 function fileExtentsion ($ext) {
     switch ($ext) {
+        // Формат картинки если архив
         case "rar";
         case "zip":
             $ext = '<img src="images/zip.png" alt="pic" class="icon">';
             break;
+
+        // Если документ
+        case "txt";
+        case "doc";
+        case "xls";
+        case "rtf";
+        case "docx":
+            $ext = '<img src="images/office.png" alt="pic" class="icon">';
+            break;
+
+        // Если html-php-css
+        case "html";
+        case "css";
+        case "php":
+            $ext = '<img src="images/php.png" alt="pic" class="icon">';
+            break;
+
+        // Если картинка
+        case "png";
+        case "jpg":
+            $ext = '<img src="images/images.png" alt="pic" class="icon">';
+            break;
+
+        // По умолчанию
         default:
             $ext = '<img src="images/other.png" alt="pic" class="icon">';
     }
