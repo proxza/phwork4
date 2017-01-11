@@ -63,7 +63,7 @@
         // Загрузка файлов
         if (@is_uploaded_file($_FILES['uploadFile']['tmp_name'])) {
             $name = $_FILES['uploadFile']['name'];
-            $uploadDir = $realDir . DIRECTORY_SEPARATOR . basename($_FILES['uploadFile']['name']);
+            $uploadDir = $_POST['realDir'] . DIRECTORY_SEPARATOR . basename($_FILES['uploadFile']['name']);
             if (move_uploaded_file($_FILES['uploadFile']['tmp_name'], $uploadDir)) {
                 echo "Файл загружен!";
             }else{
@@ -81,7 +81,7 @@
                 exit;
             case isset($_POST['addfolder']):
                 @mkdir($_POST['realDir'].$_POST['newfolder'], 0777);
-                exit("<meta http-equiv='refresh' content='0; url= $_SERVER[PHP_SELF]'>");
+                exit("<meta http-equiv='refresh' content='0; url= $_SERVER[PHP_SELF]';>");
             // Кнопка "удалить"
             case isset($_POST['delete']):
                 fileDelete($_POST['fls']);
@@ -103,8 +103,33 @@
             // Кнопка Загрузить
             case isset($_POST['upload']):
                 echo "<input type='file' name='uploadFile'>";
+                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
                 echo "<input type='submit' value='Загрузить'>";
                 exit;
+            // Кнопка прав
+            case isset($_POST['chmode']):
+                print_r($_POST['fls']);
+                echo "<tr><td><input type='checkbox' name='ch1'></td><td> - Доступ и запись для владельца/Другим доступа нет (0600)</td></tr>";
+                echo "<tr><td><input type='checkbox' name='ch2'></td><td> - Доступ и запись для владельца/Другим на чтение для других (0644)</td></tr>";
+                echo "<tr><td><input type='checkbox' name='ch3'></td><td> - Полный доступ для владельца/Другим на чтение и выполнение для других (0755)</td></tr>";
+                echo "<tr><td><input type='checkbox' name='ch4'></td><td> - god mode (0777)</td></tr>";
+                echo "<input type='hidden' name='chfls' value='".$_POST['fls']."'>";
+                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
+                echo "<tr><td colspan='2'><input type='submit' name='saveMode' value='Применить'></td></tr>";
+                exit;
+            case isset($_POST['saveMode']):
+                print_r($_POST['chfls']);
+                if (isset($_POST['ch1'])) {
+                    chmod($_POST['realDir'].$_POST['chfls'], 0600);
+                }elseif (isset($_POST['ch2'])) {
+                    chmod($_POST['realDir'].$_POST['chfls'], 0644);
+                }elseif (isset($_POST['ch3'])) {
+                    chmod($_POST['realDir'].$_POST['chfls'], 0755);
+                }elseif (isset($_POST['ch4'])) {
+                    chmod($_POST['realDir'].$_POST['chfls'], 0777);
+                }
+                break;
+
         }
 
         // Вывод
@@ -137,7 +162,10 @@
             <td><input type="submit" name="rename" value="Переименовать"></td>
         </tr>
         <tr>
-            <td><input type="submit" name="copy" value="Копировать"></td>
+            <td><input type="submit" name="copy" disabled value="Копировать"></td>
+        </tr>
+        <tr>
+            <td><input type="submit" name="chmode" value="Права доступа"></td>
         </tr>
         <tr>
             <td><input type="submit" name="upload" value="Загрузить"></td>
