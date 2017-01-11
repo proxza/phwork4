@@ -108,7 +108,7 @@
                 exit;
             // Кнопка прав
             case isset($_POST['chmode']):
-                print_r($_POST['fls']);
+                print_r(dirname(__DIR__));
                 echo "<tr><td><input type='checkbox' name='ch1'></td><td> - Доступ и запись для владельца/Другим доступа нет (0600)</td></tr>";
                 echo "<tr><td><input type='checkbox' name='ch2'></td><td> - Доступ и запись для владельца/Другим на чтение для других (0644)</td></tr>";
                 echo "<tr><td><input type='checkbox' name='ch3'></td><td> - Полный доступ для владельца/Другим на чтение и выполнение для других (0755)</td></tr>";
@@ -239,7 +239,5 @@ function fileDelete ($file){
 
 ?>
 
-
 </body>
-
 </html>
