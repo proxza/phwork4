@@ -1,6 +1,9 @@
 <html>
 <head>
     <title>1FileExplorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <style>
         body {
             background: #ffffff;
@@ -16,12 +19,17 @@
         }
 
         .inp {
-            width: 300px;
+            width: 449px;
+            margin: 3px 3px;
         }
 
         a {
             color: #000000;
             text-decoration: none;
+        }
+
+        button {
+            margin: 5px 3px;
         }
     </style>
 </head>
@@ -77,23 +85,14 @@
 
         // Обработка кнопок редактирования
         switch (true){
-            // Кнопка "создать папку"
-            case isset($_POST['create']):
-                echo "<input type='text' name='newFolder' placeholder='Название папки'>";
-                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
-                echo "<input type='submit' name='addFolder' value='Создать папку'>";
-                exit;
-            case isset($_POST['createFile']):
-                echo "<input type='text' name='fileName' placeholder='Название файла с расширением (name.txt, etc)' class='inp'> <br />";
-                echo "<input type='text' name='fileContent' placeholder='Текст файла' class='inp'> <br />";
-                echo "<input type='hidden' name='realDir' value='".$_POST['realDir']."'>";
-                echo "<input type='submit' name='addFile' value='Создать файл'>";
-                exit;
+            // Обработчик кнопки "Создать файл"
             case isset($_POST['addFile']):
                 $fileOpen = fopen($_POST['realDir'].$_POST['fileName'], "w");
                 fwrite($fileOpen, $_POST['fileContent']);
                 fclose($fileOpen);
                 break;
+
+            // Обработчик кнопки "Создать папку"
             case isset($_POST['addFolder']):
                 @mkdir($_POST['realDir'].$_POST['newFolder'], 0777);
                 break;
@@ -112,10 +111,11 @@
                 echo "<input type='submit' name='edit' value='Save'>";
                 exit;
 
-            case isset($_POST['edit']):
-                rename($_POST['realDir'].$_POST['oldname'], $_POST['realDir'].$_POST['newname']);
+            case isset($_POST['rename']):
+                rename($_POST['realDir'].$_POST['oldName'], $_POST['realDir'].$_POST['newName']);
                 // Остановка скрипта и обновление страницы
                 exit("<meta http-equiv='refresh' content='0; url= $_SERVER[PHP_SELF]'>");
+
             case isset($_POST['copy']):
                 echo "COPY";
                 break;
@@ -155,7 +155,7 @@
             if ($value != ".") {
                 // Проверка является ли значение директорией
                 if (is_dir($value) == true) {
-                    echo "<tr><td width='300px'><input type='checkbox' name='fls' value=" . $realDir . DIRECTORY_SEPARATOR . $value . "><img src=images/folder.png alt=pic class=icon> <a href=?folder=" . $realDir . DIRECTORY_SEPARATOR . $value . ">" . $value . "</a></td>";
+                    echo "<tr><td width='300px'><input type='checkbox' name='fls' value=" . $realDir . DIRECTORY_SEPARATOR . $value . "><img src=images/folder.png alt=pic class=icon> <a href=?folder=" . $realDir . DIRECTORY_SEPARATOR . $value . ">" . $value . "</a><button type=\"button\" data-toggle=\"modal\" data-target=\"#myModal_3\" name='test1' value='$value'> X </button></td>";
                     echo "<td></td></tr>";
                 }
 
@@ -171,13 +171,13 @@
 
         ?>
         <tr>
-            <td><br /><input type="submit" name="create" value="Создать папку"> <input type="submit" name="createFile" value="Создать файл"><input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></td>
+            <td><br /><button type="button" data-toggle="modal" data-target="#myModal_1">Создать папку</button><button type="button" data-toggle="modal" data-target="#myModal_2">Создать файл</button><input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></td>
         </tr>
         <tr>
-            <td><input type="submit" name="delete" value="Удалить"></td>
+            <td><button type="submit" name="delete">Удалить</button></td>
         </tr>
         <tr>
-            <td><input type="submit" name="rename" value="Переименовать"></td>
+            <td><button type="button" data-toggle="modal" data-target="#myModal_3">Переименовать</button></td>
         </tr>
         <tr>
             <td><input type="submit" name="copy" disabled value="Копировать"></td>
@@ -190,6 +190,53 @@
         </tr>
     </table>
 
+    <!-- Модальное окно создания папки -->
+    <div id="myModal_1" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><button class="close" type="button" data-dismiss="modal">×</button>
+                    <h4 class="modal-title">Создание папки</h4>
+                </div>
+                <div class="modal-body">Название папки: <input type="text" name="newFolder" placeholder="Введите название папки">
+                    <input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></div>
+                <div class="modal-footer"><input class="btn btn-default" type="submit" name="addFolder" value="Создать папку"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания файла -->
+    <div id="myModal_2" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><button class="close" type="button" data-dismiss="modal">×</button>
+                    <h4 class="modal-title">Создание файла</h4>
+                </div>
+                <div class="modal-body">Название файла: <input type="text" name="fileName" class="inp" placeholder="Название файла с расширением (name.txt, etc)">
+                    <textarea rows="15" cols="78" name="fileContent" placeholder="Текст внутри файла"></textarea>
+                    <input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></div>
+                <div class="modal-footer"><input class="btn btn-default" type="submit" name="addFile" value="Создать файл"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно переименования файлов и папок -->
+    <div id="myModal_3" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><button class="close" type="button" data-dismiss="modal">×</button>
+                    <h4 class="modal-title">Переименование</h4>
+                </div>
+                <div class="modal-body">Новое название: <input type="text" name="fileName" class="inp" placeholder="Название файла с расширением (name.txt, etc)">
+                    <input type="text" name="newName" value="<?=basename($_POST['fls']);?>">
+                    <input type="hidden" name="oldName" value="<?=basename($_POST['fls']);?>">
+                    <input type="hidden" name="realDir" value="<?=$realDir . DIRECTORY_SEPARATOR;?>"></div>
+                <div class="modal-footer"><input class="btn btn-default" type="submit" name="rename" value="Переименовать"></div>
+            </div>
+        </div>
+    </div>
+
+
+
     <?php
 
     // Вывод редактирования файла
@@ -199,6 +246,24 @@
 </form>
 
 <?php
+
+function test($value) {
+    echo <<<END<div id='myModal_3' class='modal fade'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'><button class='close' type='button' data-dismiss='modal'>×</button>
+                    <h4 class='modal-title'>Переименование</h4>
+                </div>
+                <div class='modal-body\">Новое название:
+                    <input type='text\" name=\"newName\" value='$value'>
+                    <input type='hidden' name='oldName'>
+                    <input type='hidden' name='realDir'></div>
+                <div class='modal-footer'><input class='btn btn-default' type='submit' name='rename' value='Переименовать'></div>
+            </div>
+        </div>
+    </div>"
+    END;
+}
 
 /** Функция редактирования файлов
  * @param $view
